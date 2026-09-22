@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视频模型测试广场</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/style.css?v=20">
+</head>
+<body class="mode-hero">
+
+<!-- ======= 顶栏 ======= -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-name">视频模型测试广场</span>
+    <span class="brand-sub">anything to video/audio</span>
+  </div>
+
+  <div class="topbar-right">
+    <nav class="top-nav">
+      <div class="manual-dd" id="manualDD">
+        <button class="manual-btn" type="button">
+          <span>使用手册</span>
+          <svg class="chev" viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="manual-panel">
+          <p class="manual-title">模型使用文档</p>
+          <a class="manual-item" href="https://vrfi1sk8a0.feishu.cn/wiki/FIWjwgL33ipnkekzk30crmKUnIh" target="_blank" rel="noopener">
+            MiniMax H3
+            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+      <button class="nav-link active" id="homeNav" type="button">主页</button>
+      <button class="nav-link" id="consoleNav" type="button">操作台</button>
+    </nav>
+    <div class="gs-dd" id="settingsDD">
+    <button class="model-btn" id="settingsBtn" type="button">
+      <span class="model-current" id="settingsSummary">t2va · 1280×720 · 8s</span>
+      <svg class="chev" viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="model-panel gs-panel" id="settingsPanel">
+      <p class="model-panel-title">生成设置</p>
+
+      <div class="gs-group">
+        <label class="gs-label">当前模型格式</label>
+        <div class="gs-seg" id="formatSeg"></div>
+      </div>
+
+      <div class="gs-group">
+        <label class="gs-label">模型 API 接口</label>
+        <input class="gs-input" id="apiUrlInput" type="text" placeholder="请输入模型api接口" spellcheck="false" autocomplete="off">
+      </div>
+
+      <div class="gs-group">
+        <label class="gs-label">API Key</label>
+        <div class="gs-key-row">
+          <input class="gs-input" id="apiKeyInput" type="password" placeholder="请输入 API Key（选填）" spellcheck="false" autocomplete="new-password">
+          <button class="gs-key-check" id="apiKeyCheckBtn" type="button">检测</button>
+        </div>
+        <p class="gs-key-msg" id="apiKeyMsg" hidden></p>
+      </div>
+
+      <button class="gs-done" id="settingsDone" type="button">完成</button>
+    </div>
+  </div>
+  </div>
+</header>
+
+<main class="stage">
+
+  <!-- ======= 提示词输入（hero → 紧凑） ======= -->
+  <section class="composer" id="composer">
+    <h1 class="composer-title">描述你想看到的画面</h1>
+    <p class="composer-sub">输入提示词，调整生成设置，即刻生成视频</p>
+    <div class="prompt-box" id="promptBox">
+      <!-- 按生成模式切换的上传槽位：fl2va → 首帧/尾帧；ref2va → 参考；t2va → 隐藏 -->
+      <div class="attach-slots" id="attachSlots" hidden></div>
+
+      <textarea id="promptInput" maxlength="500" spellcheck="false"
+        placeholder="例如：黄昏的海面上，一艘白色帆船缓缓驶过，镜头缓缓拉近，暖金色的光洒在水面上…"></textarea>
+      <div class="prompt-foot">
+        <div class="foot-left">
+          <div class="mode-switcher" id="modeSwitcher" hidden>
+            <button class="mode-switcher-btn" id="modeSwitcherBtn" type="button" aria-haspopup="listbox">
+              <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="ms-label" id="modeSwitcherLabel">首/尾帧</span>
+              <svg class="ms-chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="mode-switcher-panel" id="modeSwitcherPanel" role="listbox">
+              <button type="button" class="ms-opt" data-fmt="t2va" role="option">文生视频</button>
+              <button type="button" class="ms-opt" data-fmt="fl2va" role="option">首/尾帧</button>
+              <button type="button" class="ms-opt" data-fmt="ref2va" role="option">全能参考</button>
+            </div>
+          </div>
+        </div>
+        <div class="foot-right">
+          <!-- 参数按钮：比例 / 分辨率 / 时长 三段折叠在这里 -->
+          <div class="quick-btn" id="quickBtnWrap">
+            <button class="quick-btn-trigger" id="quickBtn" type="button" aria-haspopup="dialog" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span class="quick-chip" data-chip="aspect" id="quickChipAspect">16:9</span>
+              <span class="quick-chip" data-chip="resolution" id="quickChipRes">720p</span>
+              <span class="quick-chip" data-chip="duration" id="quickChipDur">8s</span>
+              <svg class="qb-chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="quick-panel" id="quickPanel" role="dialog" aria-label="生成参数" hidden>
+              <div class="qp-section">
+                <span class="qp-label">比例</span>
+                <div class="gs-ratios" id="ratioRow"></div>
+              </div>
+              <div class="qp-section">
+                <span class="qp-label">分辨率</span>
+                <div class="gs-seg" id="resSeg">
+                  <button type="button" data-res="720p" class="on"><span class="gs-seg-name">720p</span><span class="gs-seg-desc">短边 720 · 默认</span></button>
+                  <button type="button" data-res="768p"><span class="gs-seg-name">768p</span><span class="gs-seg-desc">短边 768 · 超宽≈1M 像素</span></button>
+                  <button type="button" data-res="1440p"><span class="gs-seg-name">1440p</span><span class="gs-seg-desc">短边 1440 · 超宽≈3.7M 像素</span></button>
+                </div>
+              </div>
+              <div class="qp-section">
+                <span class="qp-label">时长 <em class="gs-dur" id="durationVal">8 秒</em></span>
+                <input class="gs-range" id="durationRange" type="range" min="5" max="15" step="1" value="8">
+              </div>
+            </div>
+          </div>
+          <button class="btn-generate" id="generateBtn" type="button">
+            <span class="btn-label">生成视频</span>
+            <svg viewBox="0 0 24 24" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= 工作区：左播放器 / 右列表 ======= -->
+  <section class="workspace" id="workspace">
+
+    <div class="player-pane" id="playerPane">
+      <div class="player-card" id="playerCard">
+
+        <div class="player-surface" id="playerSurface">
+          <video id="videoEl" playsinline></video>
+
+          <div class="player-empty" id="playerEmpty">
+            <svg class="pe-icon" viewBox="0 0 24 24" width="36" height="36"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/><path d="M7 5l.8-2h8.4L17 5M7 19l.8 2h8.4l.8-2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p class="pe-text" id="peText">生成的视频将在这里播放</p>
+            <div class="pe-progress" id="peProgress" hidden>
+              <div class="pe-bar"><i id="peBarFill"></i></div>
+              <span id="pePct">0%</span>
+            </div>
+            <p class="pe-msg" id="peMsg" hidden></p>
+          </div>
+
+          <button class="play-overlay" id="playOverlay" type="button" hidden>
+            <svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <!-- 裁剪面板 -->
+        <div class="trim-panel" id="trimPanel">
+          <span class="trim-times" id="trimTimes">0.0s – 0.0s</span>
+          <span class="trim-gap"></span>
+          <button class="tbtn" id="markStartBtn" type="button">设为起点</button>
+          <button class="tbtn" id="markEndBtn" type="button">设为终点</button>
+          <button class="tbtn" id="previewTrimBtn" type="button">
+            <svg viewBox="0 0 24 24" width="11" height="11"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>预览
+          </button>
+          <span class="trim-gap"></span>
+          <button class="tbtn tbtn-primary" id="exportTrimBtn" type="button">
+            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>导出片段
+          </button>
+          <button class="tbtn tbtn-icon" id="closeTrimBtn" type="button" title="退出裁剪">
+            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <!-- 控制条 -->
+        <div class="controls" id="controls">
+          <div class="seek" id="seek">
+            <div class="seek-track" id="seekTrack">
+              <div class="seek-trim-range" id="trimRange"></div>
+              <div class="seek-played" id="seekPlayed"></div>
+              <div class="seek-head" id="seekHead"></div>
+              <div class="seek-handle seek-handle-l" id="handleL"><i></i></div>
+              <div class="seek-handle seek-handle-r" id="handleR"><i></i></div>
+            </div>
+            <div class="seek-tip" id="seekTip" hidden>0:00</div>
+          </div>
+          <div class="ctl-row">
+            <button class="ctl" id="playBtn" type="button" title="播放 / 暂停（空格）">
+              <svg class="ic ic-play" viewBox="0 0 24 24" width="17" height="17"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+              <svg class="ic ic-pause" viewBox="0 0 24 24" width="17" height="17"><path d="M7.5 5h3.4v14H7.5zM13.1 5h3.4v14h-3.4z" fill="currentColor"/></svg>
+            </button>
+            <span class="ctl-time" id="timeLabel">0:00 / 0:00</span>
+            <span class="ctl-gap"></span>
+            <button class="ctl ctl-toggle" id="trimBtn" type="button" title="裁剪视频">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path d="M6.5 9.2a2.9 2.9 0 1 0 0-5.8 2.9 2.9 0 0 0 0 5.8zM6.5 20.6a2.9 2.9 0 1 0 0-5.8 2.9 2.9 0 0 0 0 5.8zM19.8 4.2 9.4 14.6M14.1 14.7l5.7 5.7M9.4 9.4l3.2 3.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <span>裁剪</span>
+            </button>
+            <button class="ctl" id="muteBtn" type="button" title="静音">
+              <svg class="ic ic-vol" viewBox="0 0 24 24" width="17" height="17"><path d="M11 5.5 6.5 9H3.8v6h2.7L11 18.5zM14.8 9a4.3 4.3 0 0 1 0 6M17.2 6.8a7.4 7.4 0 0 1 0 10.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="ic ic-muted" viewBox="0 0 24 24" width="17" height="17"><path d="M11 5.5 6.5 9H3.8v6h2.7L11 18.5zM15.5 9.5l5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="ctl" id="fsBtn" type="button" title="全屏">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8.5 3.5H5.5a2 2 0 0 0-2 2v3M15.5 3.5h3a2 2 0 0 1 2 2v3M15.5 20.5h3a2 2 0 0 0 2-2v-3M8.5 20.5h-5.5a2 2 0 0 1-2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" transform="translate(2 0)"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="resize-handle" id="resizeHandle" title="拖动调整播放器尺寸">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19 9v5h-5M19 14a9 9 0 0 0-9-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" transform="rotate(90 12 12) translate(6 -6)"/></svg>
+        </div>
+      </div>
+
+      <div class="player-meta" id="playerMeta">
+        <span class="pm-chip" id="pmModel" hidden></span>
+        <span class="pm-prompt" id="pmPrompt">尚未生成视频</span>
+        <span class="pm-spec" id="pmSpec" hidden></span>
+      </div>
+      <p class="player-hint">温馨提示：拖动视频右下角可控制放映器大小</p>
+    </div>
+
+    <!-- ======= 右侧：生成记录 ======= -->
+    <aside class="library">
+      <div class="library-head">
+        <span class="library-title">生成记录 <em class="count" id="libCount"></em></span>
+        <div class="library-actions">
+          <button class="link-btn" id="selectAllBtn" type="button">全选</button>
+          <button class="link-btn" id="mergeBtn" type="button" title="将勾选的视频按自选顺序拼接">视频拼接</button>
+          <button class="btn-dark-sm" id="downloadBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="downloadLabel">批量下载</span>
+          </button>
+        </div>
+      </div>
+      <div class="library-list" id="libraryList"></div>
+    </aside>
+  </section>
+</main>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ======= 视频拼接弹窗 ======= -->
+<div class="merge-modal" id="mergeModal" hidden>
+  <div class="mm-mask" id="mergeMask"></div>
+  <div class="mm-dialog" id="mergeDialog">
+    <div class="mm-timeline-wrap">
+      <div class="mm-timeline" id="mmTimeline"></div>
+    </div>
+    <p class="mm-hint">拖动卡片调整顺序 · 点击卡片选中 · 预览按顺序自动连播</p>
+
+    <div class="mm-player">
+      <video id="mmVideoA" playsinline></video>
+      <video id="mmVideoB" class="off" playsinline></video>
+      <div class="mm-controls">
+        <button class="mm-ctl" id="mmPlayBtn" type="button" title="播放 / 暂停">
+          <svg class="ic ic-play" viewBox="0 0 24 24" width="16" height="16"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+          <svg class="ic ic-pause" viewBox="0 0 24 24" width="16" height="16"><path d="M7.5 5h3.4v14H7.5zM13.1 5h3.4v14h-3.4z" fill="currentColor"/></svg>
+        </button>
+        <div class="mm-seek" id="mmSeek">
+          <div class="mm-seek-track" id="mmSeekTrack">
+            <div class="mm-seg-marks" id="mmSegMarks"></div>
+            <div class="mm-played" id="mmPlayed"></div>
+            <div class="mm-seek-head" id="mmHead"></div>
+          </div>
+        </div>
+        <span class="mm-time" id="mmTime">0:00 / 0:00</span>
+      </div>
+    </div>
+
+    <div class="mm-foot">
+      <span class="mm-total" id="mmTotal">—</span>
+      <div class="mm-foot-actions">
+        <button class="mm-btn" id="mergeCancelBtn" type="button">取消</button>
+        <button class="mm-btn mm-btn-primary" id="mergeSaveBtn" type="button">保存至生成记录</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js?v=15"></script>
+</body>
+</html>

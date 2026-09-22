@@ -1,0 +1,23 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ---- PyInstaller 产物 ----
+build/
+dist/
+*.spec.bak
+
+# ---- 运行期生成（视频/上传） ----
+videos/
+uploads/
+
+# ---- GUI 测试截图（含测试脚本，按需保留） ----
+gui-test-screenshots/
+
+# ---- 环境配置 ----
+.env
+
+# ---- 系统 ----
+.DS_Store

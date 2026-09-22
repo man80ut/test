@@ -1,0 +1,45 @@
+name: Build macOS App
+
+# 触发条件：
+#   1) 推送到 main / master 分支时自动构建
+#   2) 在 GitHub 网页 Actions 标签页手动点击 "Run workflow" 触发
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    # 默认 = 苹果芯片 (Apple Silicon, arm64)，产物适配 M1/M2/M3/M4 Mac
+    # 若你有 Intel Mac (x86_64)，把下面一行改为： runs-on: macos-13
+    runs-on: macos-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安装依赖 + PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: 打包为 VideoStudio.app
+        run: |
+          pyinstaller video-studio-mac.spec --noconfirm
+
+      - name: ad-hoc 签名（缓解 Gatekeeper 拦截）
+        run: |
+          codesign --force --deep --sign - "dist/VideoStudio.app" 2>/dev/null || true
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoStudio-macOS
+          path: dist/VideoStudio.app
+          retention-days: 30
