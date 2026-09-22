@@ -21,3 +21,9 @@ gui-test-screenshots/
 
 # ---- 系统 ----
 .DS_Store
+
+# ---- IDE 缓存 ----
+.idea/
+
+# ---- WorkBuddy 项目数据（含本地工作日志，勿上传） ----
+.workbuddy/
